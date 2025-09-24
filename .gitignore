@@ -1,0 +1,25 @@
+# Jekyll generated site
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Bundler and dependencies
+/vendor/
+/.bundle/
+/Gemfile.lock
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node (if using JS tooling)
+node_modules/
+npm-debug.log
+yarn-error.log

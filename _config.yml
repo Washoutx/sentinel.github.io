@@ -1,6 +1,6 @@
-title: Hacker theme
-description: Hacker is a theme for GitHub Pages.
-show_downloads: true
+title: IT pages and notes
+description: Programming blog etc. by Patryk Kupś 
+show_downloads: false
 google_analytics:
 theme: jekyll-theme-hacker
 remote_theme: pages-themes/hacker@v0.2.0
