@@ -120,4 +120,11 @@ Long, single-line code blocks should not wrap. They should horizontally scroll i
 The final element.
 ```
 
+
+In C++ we can use different kind of memories for data storage. C++ Standard group them in the following sections based on lifetime of the [storage containing the object](https://en.cppreference.com/w/cpp/language/storage_duration.html):
+* static storage duration (static/globals)
+* thread storage duration (since C++11 thread_local keyword)
+* automatic storage duration (STACK)
+* dynamic storage dyration (HEAP)
+
 [back](./)
