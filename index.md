@@ -10,6 +10,6 @@ If you notice any logical errors or major bugs in the code or article, feel free
 
 ## Articles:
 
-* [LONG] [ Static memory pools and PMR(Polymorphic Memory Resource)](./articles/static_mem_pmr.html)
+* [LONG][C++] [ Static memory pools and PMR(Polymorphic Memory Resource)](./articles/static_mem_pmr.html)
 * [TemplateForArticles] [Template](./articles/template.html)
 

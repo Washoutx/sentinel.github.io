@@ -5,7 +5,7 @@ layout: default
 # Static memory pools and PMR(Polymorphic Memory Resource)
 
 Handling heap memory comes with a performance overhead, so if we know how much memory we need, we may prefer to use memory pools.
-In general, a `MemoryPool` is a complex type that provides a set of methods to manage the memory it encapsulates.
+In general, a `MemoryPool` is a class type that provides a set of methods to manage the memory it encapsulates.
 `MemoryPool` can handle either static or dynamic memory. Using dynamic memory pool we can reduce `new` calls to one when we initialize the `MemoryPool` object, otherwise we can use static memory pool and reduce `new` calls to zero. Actually it won't be zero but instead we will use samething called `placement new`. I will back to this later.
 
 The concept of a dynamic memory pool is fairly simple, so we'll focus on the static one instead. Let's define the requirements for this implementation. The code will be simplified, as the goal is just to demonstrate the concept.
@@ -39,8 +39,7 @@ ptr->i=1670
 ~Object()
 ```
 1. Creation of a 10-byte buffer aligned to `alignof(Object)` which is `4` in our case.
-Memory alignment is a complex topic, so I’ve made a separate article about it [here](TODO).
-TL;DR: Alignment ensures that the object is initialized at a memory address that satisfies the type's alignment requirements. For example, the address must fulfill the condition `addr % alignof(Object) == 0` to be valid for an Object. In the context of our example, the alignment condition is guaranteed at the start of the buffer due to `alignas(Object)`, and it will also be satisfied for any subsequent address offset by a multiple of `alignof(Object)` as long as it remains within the bounds of the buffer. If you try to initialize an `Object` at `buffer+1`, the address will likely be misaligned, resulting in undefined behavior. But I should mention here that x86 supports unaligned memory access, and even modern ARM architectures support it as well — although it can cause performance penalties. On the other hand, `buffer+4` is valid because it satisfies the alignment requirement. To safely obtain an aligned address within a buffer, check out `std::align`.
+Memory alignment ensures that the object is initialized at a memory address that satisfies the type's alignment requirements. For example, the address must fulfill the condition `addr % alignof(Object) == 0` to be valid for an Object. In the context of our example, the alignment condition is guaranteed at the start of the buffer due to `alignas(Object)`, and it will also be satisfied for any subsequent address offset by a multiple of `alignof(Object)` as long as it remains within the bounds of the buffer. If you try to initialize an `Object` at `buffer+1`, the address will likely be misaligned, resulting in undefined behavior. But I should mention here that x86 supports unaligned memory access, and even modern ARM architectures support it as well — although it can cause performance penalties. On the other hand, `buffer+4` is valid because it satisfies the alignment requirement. To safely obtain an aligned address within a buffer, check out `std::align`.
 
 2. Placement new syntax that initializes an Object at the beginning of the buffer.
 This is a way to construct an object in pre-allocated memory without allocating new memory from the heap.
@@ -48,7 +47,7 @@ This is a way to construct an object in pre-allocated memory without allocating 
 3. Manual destructor call, which is required in the case of placement new.
 This is one of the rare cases in C++ where the destructor needs to be called explicitly, since there is no such thing as `placement delete`.
 
-Now that we understand how placement new works, we can proceed to the `MemoryPool` implementation.
+Now that we understand how placement new works, we can move on to implementing the `MemoryPool`.
 
 ```cpp
 template<typename T, std::size_t N>
@@ -139,10 +138,10 @@ obj3=0x16bc2ed58 obj3->i=1673
 ~Object()
 ~Object()
 ```
-My MemoryPool is divided into memory chunks of size T. A `std::bitset<N> slots{}` is used to track which chunks are currently allocated.
+My MemoryPool is divided into memory blocks of size T. A `std::bitset<N> slots{}` is used to track which blocks are currently allocated.
 However, this implementation has a performance drawback. The slots bitset must be scanned each time a new object is allocated via the `T* allocate(Args&&... args)`. For example, if there are 100,000 total elements and 50,000 of them are already in use, the allocation loop may need to check up to 50,000 bits before finding a free slot.
 
-The purpose of the bitset is to avoid memory fragmentation. Suppose we had a simpler implementation that used only a buffer and a pointer to the next available slot. If an object were deallocated somewhere in the middle of the buffer, it would leave a "hole" in memory that wouldn't be reused (It can be reuse but it isn't easy). By using slots, we can clear the flag for a specific chunk when it is deallocated, allowing it to be reused in future allocations. As shown in our example, `obj3` is allocated at the address previously occupied by `obj1`, which was deallocated. Of course, we could extend this implementation by adding a container to track free indexes, but I’ve kept it simple for the purpose of this article.
+The purpose of the bitset is to avoid memory fragmentation. Suppose we had a simpler implementation that used only a buffer and a pointer to the next available slot. If an object were deallocated somewhere in the middle of the buffer, it would leave a "hole" in memory that wouldn't be reused (It can be reuse but it isn't easy). By using slots, we can clear the flag for a specific block when it is deallocated, allowing it to be reused in future allocations. As shown in our example, `obj3` is allocated at the address previously occupied by `obj1`, which was deallocated. Of course, we could extend this implementation by adding a container to track free indexes, but I’ve kept it simple for the purpose of this article.
 
 The `void deallocate(T* ptr)` function first checks whether the pointer is within the buffer's address range. The `bool owns(const T* ptr)` function uses `std::uintptr_t` to compare pointer values. This is an unsigned integer type guaranteed to be large enough to hold any pointer value on the current platform. For example, on a 32-bit architecture, `std::uintptr_t` will typically be 4 bytes, while on a 64-bit architecture, it will be 8 bytes. This ensures that all virtual memory addresses can safely be stored and compared using this type. 
 
@@ -182,7 +181,7 @@ The compiler may expand these declarations as follows (you can check this using 
   std::vector<int, CustomAlloc<int> > v2 = std::vector<int, CustomAlloc<int> >();
   std::vector<int, std::pmr::polymorphic_allocator<int> > v3 = std::vector<int, std::pmr::polymorphic_allocator<int> >();
 ```
-Because of this, we cannot write a single function like `void foo(std::vector<int>)` that works for both v1 and v2.
+Because of this, we cannot write a single function like `void foo(std::vector<int>)` that works for both v1 and v2 because v1 uses default `std::allocator<int>` allocator.
 Of course, you might have noticed the third example, v3, which belongs to the special `std::pmr::` namespace. Its default allocator is `std::pmr::polymorphic_allocator<int>`. This is a special adaptor that internally holds a pointer to a `std::pmr::memory_resource`.
 So what is `std::pmr::memory_resource`? It is an abstract interface with three pure virtual functions:
 ```cpp
@@ -223,20 +222,67 @@ int main() {
     return 0;
 }
 ```
-And we can make many custom allocators this way and all the vectors with different kind of allocator can be use with the same
-API eg. `void foo(std::pmr::vector<int>)`
-The allocator does not change the vector’s type. It will always be `std::vector<T, std::pmr::polymorphic_allocator<T>>`.
-And is that all? Not quite. Let’s see what else the standard library provides in the `PMR` namespace.
+As you can see, I am not changing the base allocator. `std::pmr::polymorphic_allocator` holds a pointer to a `std::pmr::memory_resource`. By inheriting memory_resource, `CustomAlloc` can be passed to the allocator.
+We can also create many custom allocators this way, and all vectors using different allocators can still be passed around with the same API, e.g. `void foo(std::pmr::vector<int>)`
+The allocator does not change the type of the vector. It will always be `std::vector<T, std::pmr::polymorphic_allocator<T>>`.
+And is that all? Not quite. Let’s take a look at what else the standard library provides in the `std::pmr` namespace.
+
+`std::pmr::monotonic_buffer_resource` is a concept similar to our memory pool. We can construct it with an external memory buffer like this:
 ```cpp
-std::pmr::monotonic_buffer_resource
-std::pmr::unsynchronized_pool_resource
-std::pmr::synchronized_pool_resource
-
-std::pmr::new_delete_resource()
-std::pmr::null_memory_resource()
-std::pmr::get_default_resource()
-std::pmr::set_default_resource()
+    std::array<std::byte, 1024> buffer;
+    std::pmr::monotonic_buffer_resource mbr{buffer.data(), buffer.size()};
+    std::pmr::vector<int> list{&mbr};
 ```
+or a variant with a fallback memory resource, which I will describe later
+```cpp
+    std::array<std::byte, 1024> buffer;
+    std::pmr::monotonic_buffer_resource mbr{buffer.data(), buffer.size(), std::pmr::null_memory_resource()};
+    std::pmr::vector<int> list{&mbr};
+```
+Ok, let’s pause for a moment and describe what is going on here. `std::pmr::monotonic_buffer_resource` is useful when we know the amount of data in advance and their lifetime is short, because deallocation only happens when the container using this memory resource is destroyed.
 
+But what happens if the monotonic buffer consumes the entire external buffer? In our static memory pool implementation above, we simply return nullptr. In contrast, `std::pmr::monotonic_buffer_resource` has an additional attribute: a pointer to a fallback mechanism called the upstream resource. By default, it uses `std::pmr::get_default_resource()`.
+
+1. `std::pmr::get_default_resource()` returns `std::pmr::new_delete_resource()` by default, or another resource if `std::pmr::set_default_resource()` has been called.
+2. `std::pmr::new_delete_resource()` returns a pointer to the memory resource, which simply uses new and delete in its allocate() and deallocate() functions.
+3. `std::pmr::null_memory_resource()` returns a pointer to a memory resource whose allocate() always throws `std::bad_alloc`, while its deallocate() does nothing.
+
+So what does this mean in practice? If a memory resource exhausts its entire external buffer, it will fall back to its upstream resource. That upstream might simply use new/delete to obtain more memory, throw an exception, or behave differently if you implement your own custom upstream resource.
+
+Another things are wrappers to memory resources called pool resource.
+1. `std::pmr::unsynchronized_pool_resource`
+2. `std::pmr::synchronized_pool_resource`
+
+They work the same way, but the synchronized version is thread-safe. These classes use the upstream resource as a managed buffer. For example, we can pass them a `std::pmr::monotonic_buffer_resource` like this:
+```cpp
+int main() {
+    std::array<std::byte, 512> buffer;
+    std::pmr::monotonic_buffer_resource mbr{buffer.data(), 
+                                            buffer.size(), 
+                                            std::pmr::null_memory_resource()};
+
+    std::pmr::pool_options opts{.max_blocks_per_chunk = 10, 
+                                .largest_required_pool_block = 1};
+    
+    std::pmr::unsynchronized_pool_resource pool(opts, &mbr);
+    std::pmr::vector<std::byte> vec(&pool);
+    try
+    {
+        for (int i = 0; i < 10; ++i) {
+            vec.push_back(std::byte{});
+        }
+    }
+    catch(std::bad_alloc e)
+    {
+        std::cout << e.what();
+    }
+    return 0;
+}
+```
+With this configuration, `std::pmr::unsynchronized_pool_resource` allocates 10-byte blocks per chunk request from the upstream resource. 
+A block is returned to the chunk after deallocation, so its behavior is similar to my static memory pool.
+The buffer is also used to store internal metadata, so you need to be careful when choosing the buffer size. The example above will still throw an exception, even if I provide a 512-byte buffer. (TODO: Debug it and provide more details about memory usage)
+
+So that’s it for `PMR`. Try experimenting with this yourself. Cheers!
 
 [back](./)
