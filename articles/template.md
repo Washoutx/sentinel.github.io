@@ -138,4 +138,4 @@ In C++ we can use different kind of memories for data storage. C++ Standard grou
 </details>
 
 
-[back](./)
+[back](/)
