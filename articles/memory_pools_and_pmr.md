@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# Static memory pools and PMR(Polymorphic Memory Resource)
+# Memory Pools and PMR(Polymorphic Memory Resource)
 
 Handling heap memory comes with a performance overhead, so if we know how much memory we need, we may prefer to use memory pools.
 In general, a `MemoryPool` is a class type that provides a set of methods to manage the memory it encapsulates.

@@ -127,4 +127,15 @@ In C++ we can use different kind of memories for data storage. C++ Standard grou
 * automatic storage duration (STACK)
 * dynamic storage dyration (HEAP)
 
+<details>
+<summary>Memory types in C++</summary>
+
+1. static storage duration (static/globals)
+2. thread storage duration (since C++11 `thread_local` keyword)
+3. automatic storage duration (STACK)
+4. dynamic storage duration (HEAP)
+
+</details>
+
+
 [back](./)
