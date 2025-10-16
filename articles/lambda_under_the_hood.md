@@ -51,7 +51,7 @@ int main()
 ```
 
 This example is good to show why `mutable` keyword is used in context of lambdas.
-As you can see `operator()` is const. So I cannot change the generated `__lambda_6_19`
+As you can see `operator()` is `const`. So I cannot change the generated `__lambda_6_19`
 attributes. `i` is pass to lambda via copy so it is part of the generated functor. 
 Following code is invalid:
 
@@ -112,9 +112,9 @@ int main()
   return 0;
 }
 ```
-As you can see `const` disappeared from `operator()`. And thats the whole magic behind this.
+As you can see `const` disappeared from `operator()`. And that is the whole magic behind this.
 
-You need to be carefull if you create lambdas which are using references. Check following example of dangling reference:
+You need to be carefull if you create lambdas which use references. Check following example of dangling reference:
 ```cpp
 auto genLambda()
 {
@@ -171,6 +171,6 @@ Output is UB...
     6 |   return [&j]{ return j; };
 ```
 
-This was trivial example, but imagine situation when you are copying lambdas between
-different threads, operatations on reference may lead to race conditions and weird results.
+This was trivial example, but imagine situation when you copy lambdas between different threads, operations on reference may lead to race conditions and weird results.
+
 [back](/)
