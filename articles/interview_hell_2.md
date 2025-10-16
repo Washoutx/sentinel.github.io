@@ -235,9 +235,9 @@ void foo() &
 void foo() &&
 ```
 As we said earlier `foo()` doesn't lost an information of the underyling type. For R-value there is `my_forward<A>(obj)` and for the L-value there is
-`my_forward<A &>(obj)`. So let's match it with the `my_forward` definition. IT uses reference collapsing rules in casting and return value. Thanks to that we returns L-value or R-value reference.
+`my_forward<A &>(obj)`. So let's match it with the `my_forward` definition. It uses reference collapsing rules in casting and return value. Thanks to that we returns L-value or R-value reference.
 
-You can wonder why we need to declare template type explicitly `my_forward<A>(obj)` but `my_move(i)` works without that. It is make on purpose and it is related to something called `non-deduced context` of `std::remove_reference_t` in the parameter of `my_foward`. (more details: https://timsong-cpp.github.io/cppwp/n4659/temp.deduct.call or https://stackoverflow.com/questions/70159423/forward-with-remove-reference-in-template-function-parameter-type). It push the user to specify template type of `my_forward`. Thanks to that we avoid issues like in the following example:
+You can wonder why we need to declare template type explicitly `my_forward<A>(obj)` but `my_move(i)` works without that. It is make on purpose and it is related to something called `non-deduced context` of `std::remove_reference_t` in the parameter of `my_foward`. (more details: [Template argument deduction](https://timsong-cpp.github.io/cppwp/n4659/temp.deduct.call) or [stackoverflow](https://stackoverflow.com/questions/70159423/forward-with-remove-reference-in-template-function-parameter-type)). It push the user to specify template type of `my_forward`. Thanks to that we avoid issues like in the following example:
 ```cpp
 struct A
 {
