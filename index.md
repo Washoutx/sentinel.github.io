@@ -11,7 +11,8 @@ If you notice any logical errors or major bugs in the code or article, feel free
 
 ## Articles:
 <!-- * 🔹[CPU] ⭐ [Cache coherence/trashing and false sharing/branch prediction](./articles/interview_hell_2.html)
-* 🔹[LINUX] ⭐ [What really happens when you turn on your PC?](./articles/interview_hell_2.html)
+* 🔹[ALGO] [Lossless data compression - Huffman Coding](./articles/interview_hell_2.html)
+* 🔹[OS] ⭐ [What really happens when you turn on your PC?](./articles/interview_hell_2.html)
 * 🔹[EMBED] [Check I2C with Channel Logic Analyser](./articles/interview_hell_2.html)
 * 🔹[C++] [Let's check the C++20: Corutines](./articles/interview_hell_2.html)
 * 🔹[C++] [Let's check the C++20: Modules](./articles/interview_hell_2.html)
@@ -20,8 +21,8 @@ If you notice any logical errors or major bugs in the code or article, feel free
 * 🔹[C++] [Back to the basics: Multithreading with C++20](./articles/interview_hell_2.html)
 * 🔹[C++] [gRPC - How is it work?](./articles/interview_hell_2.html)
 * 🔹[API] [RESTful API - How is it work?](./articles/interview_hell_2.html)
-* 🔹[API] [How function call works on ASM level?](./articles/interview_hell_2.html)
-* 🔹[LINUX] [TCP Server - Creation and connection](./articles/interview_hell_2.html) -->
+* 🔹[OS] [How function call works on ASM level?](./articles/interview_hell_2.html)
+* 🔹[OS] [TCP Server - Creation and connection](./articles/interview_hell_2.html) -->
 * 🔹[C++] [Simple ThreadPool for tasks execution](./articles/simple_thread_pool.html)
 * 🔸[C++] [Why are some lambdas tricky? What is a lambda under the hood?](./articles/lambda_under_the_hood.html)
 * 🔸[C++] [What is Perfect Forwarding/Forwarding Reference and std::move vs std::forward?](./articles/interview_hell_2.html)

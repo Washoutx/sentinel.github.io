@@ -79,7 +79,7 @@ void foo() &&
 What do `std::forward` and `std::move` actually do under the hood?
 They are essentially just static casts to `T&&`.
 
-But first we need to show how forwarding reference impacts template specialization generation (you can use https://cppinsights.io/ to check that).
+But first we need to show how forwarding reference impacts template specialization generation (you can use [cppinsights](https://cppinsights.io) to check that).
 Lets analyse the custom `std::move` implementation:
 ```cpp
 template<typename T>
