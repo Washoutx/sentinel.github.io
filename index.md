@@ -20,10 +20,12 @@ If you notice any logical errors or major bugs in the code or article, feel free
 * 🔹[C++] [Back to the basics: Multithreading with C++20](./articles/interview_hell_2.html)
 * 🔹[C++] [gRPC - How is it work?](./articles/interview_hell_2.html)
 * 🔹[API] [RESTful API - How is it work?](./articles/interview_hell_2.html)
-* 🔹[LINUX] [TCP Server - Creation and connection](./articles/interview_hell_2.html)
-* 🔸[C++] [Why are some lambdas tricky? What is a lambda under the hood?](./articles/interview_hell_2.html)
-* 🔸[C++] [Interview hell #2: What is Static Initialization Order Fiasco and Perfect Forwarding?](./articles/interview_hell_2.html) -->
-* 🔹[C++] [Interview hell #1: What is ADL/SSO/SBO/BCO/ODR/SFINAE/CRTP/CTAD/RTTI/POD?](./articles/interview_hell_1.html)
+* 🔹[API] [How function call works on ASM level?](./articles/interview_hell_2.html)
+* 🔹[LINUX] [TCP Server - Creation and connection](./articles/interview_hell_2.html) -->
+* 🔹[C++] [Simple ThreadPool for tasks execution](./articles/simple_thread_pool.html)
+* 🔸[C++] [Why are some lambdas tricky? What is a lambda under the hood?](./articles/lambda_under_the_hood.html)
+* 🔸[C++] [What is Perfect Forwarding/Forwarding Reference and std::move vs std::forward?](./articles/interview_hell_2.html)
+* 🔸[C++] [What is ADL/SSO/SBO/BCO/ODR/SFINAE/CRTP/CTAD/RTTI/POD/Static Initialization Order Fiasco?](./articles/interview_hell_1.html)
 * 🔹[C++] [Memory Pools and PMR(Polymorphic Memory Resource)](./articles/memory_pools_and_pmr.html)
 * [TemplateForArticles] [Template](./articles/template.html)
 

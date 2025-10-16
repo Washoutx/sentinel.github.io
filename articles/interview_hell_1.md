@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# Interview hell #1: What is ADL/SSO/SBO/EBO/ODR/SFINAE/CRTP/CTAD/RTTI/POD?
+### What is ADL/SSO/SBO/BCO/ODR/SFINAE/CRTP/CTAD/RTTI/POD/Static Initialization Order Fiasco?
 
 In this article, we will try to explain some common shortcuts that may be asked about during a C++ interview. Without further introduction, let’s begin.
 
@@ -373,5 +373,28 @@ Note: Good example which proves that `~A() = default;` is not equal `~A(){};`
     - No virtuals → standard layout.
     - Can still be copied bitwise → trivially copyable.
 4.  - Has virtual function → non-trivial, non-standard layout, not trivially copyable.
+
+### Static Initialization Order Fiasco
+It is a situation where the initialization of some global variables depends on each other across different translation units. The C++ standard does not define the order of initialization for global variables. Initialization happens in a special binary section before main() is invoked. The exact order can depend on the compiler, linker, and linker optimizations.
+
+```cpp
+// a.cpp
+int a = 10;
+// b.cpp
+extern int a;
+int b = a + 1; // Undefined Behavior: 'a' may not be initialized yet
+```
+This specific situation can be fixed by using function wrapper
+```cpp
+// a.cpp
+int& getA() {
+    static int a = 10; // safely initialized on first call
+    return a;
+}
+// b.cpp
+extern int getA();
+int b = getA() + 1;
+```
+The same problem can occur in object constructors, so it is best to avoid relying on the initialization order of global or static variables across translation units.
 
 [back](/)
