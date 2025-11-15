@@ -4,8 +4,11 @@ layout: default
 
 # Why are some lambdas tricky? What is a lambda under the hood?
 
-What is lambda? To be honest it is just syntax sugar. It is implementation defined but
+What is lambda? 
+To be honest it is just syntax sugar. It is implementation defined but
 compilers mostly just generate callable object which is class with `operator()` (functor).
+General construct of lambda:
+`TypeOfLambda lambdaObject = [Captures](Parameters) -> ReturnType { Body };`
 
 Let's check what compiler does with following example:
 ```cpp
@@ -172,5 +175,60 @@ Output is UB...
 ```
 
 This was trivial example, but imagine situation when you copy lambdas between different threads, operations on reference may lead to race conditions and weird results.
+
+C++14 introduced generic(polymorphic) lambdas:
+```cpp
+auto lambda = [](auto arg) { return arg; }
+```
+It is easy to deduce that the compiler will generate template operator().
+But there is one problem we cannot make something like this:
+```cpp
+auto lambda = [](std::vector<auto> arg) { return arg; } // it will not compile
+```
+To fix that C++20 introduce additional syntax:
+```cpp
+auto lambda = [] <typename T> (std::vector<T> arg){ return arg; };
+```
+Compiler generates:
+```cpp
+  class __lambda_5_19
+  {
+    public: 
+    template<typename T>
+    inline /*constexpr */ auto operator()(std::vector<T> arg) const
+    {
+      return arg;
+    }
+    private: 
+    template<typename T>
+    static inline /*constexpr */ auto __invoke(std::vector<T> arg)
+    {
+      return __lambda_5_19{}.operator()<T>(arg);
+    }
+    
+    public:
+    // /*constexpr */ __lambda_5_19() = default;
+    
+  };
+```
+
+Curiosity: Since C++20 lambdas can be inherited by another classes
+```cpp
+template<typename ...T>
+class A : T...
+{
+
+};
+
+int main()
+{
+    auto lambda1 = []{};
+    auto lambda2 = []{};
+
+    A<decltype(lambda1), decltype(lambda2)> obj;
+
+    return 0;
+}
+```
 
 [back](/)

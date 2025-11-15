@@ -135,6 +135,30 @@ sizeof(Composition2)=4
 ```
 [[no_unique_address]] is a hint to the compiler. It tells the compiler that, if possible, it should not assign a separate address for this member (often used with empty types), allowing for optimizations similar to EBCO.
 
+Thanks to EBO we can safe some memory using lambdas as custom deleters instead of functions.
+```cpp
+void del(int* d){ delete d; };
+
+int main()
+{
+    std::unique_ptr<int, decltype(&del)> 
+        uniq_custom_del_fun (new int(10), &del);
+
+    std::println("uniq_custom_del_fun={}", sizeof(uniq_custom_del_fun));
+
+
+    std::unique_ptr<int, decltype([](int *d){ delete d;})> 
+        uniq_custom_del_lambda (new int(10));
+
+    std::println("uniq_custom_del_lambda={}", sizeof(uniq_custom_del_lambda));
+    return 0;
+}
+```
+```
+uniq_custom_del_fun=16
+uniq_custom_del_lambda=8
+```
+
 ### ODR - One Definition Rule
 The title says everything :)
 ```cpp
